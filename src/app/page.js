@@ -36,10 +36,12 @@ export default function Home() {
   };
 
   const loadMyCourses = async () => {
+    setLoadingMyCourses(true);
     const resp = await axios.get("/api/enrollment", {
       headers: { Authorization: `Bearer ${token}` },
     });
     setMyCourses(resp.data.courses);
+    setLoadingMyCourses(false);
   };
 
   useEffect(() => {
@@ -54,14 +56,19 @@ export default function Home() {
 
   const login = async () => {
     try {
+      setLoadingLogin(true);
+      setLoadingMyCourses(false);
       const resp = await axios.post("/api/user/login", { username, password });
       setToken(resp.data.token);
       setAuthenUsername(resp.data.username);
       setUsername("");
       setPassword("");
+      setLoadingMyCourses(true);
+      setLoadingLogin(false);
     } catch (error) {
       if (error.response.data) {
         alert(error.response.data.message);
+        setLoadingLogin(false);
       }
     }
   };
@@ -105,7 +112,12 @@ export default function Home() {
                 onChange={(e) => setPassword(e.target.value)}
                 value={password}
               />
-              <Button onClick={login}>Login</Button>
+              {!loadingLogin && <Button onClick={login}>Login</Button>}
+              {loadingLogin && (
+                <Button onClick={login} disabled>
+                  Login...
+                </Button>
+              )}
             </Group>
           )}
           {authenUsername && (
@@ -124,6 +136,7 @@ export default function Home() {
           {!authenUsername && (
             <Text color="dimmed">Please login to see your course(s)</Text>
           )}
+
           {authenUsername &&
             myCourses &&
             myCourses.map((course) => (
@@ -132,10 +145,9 @@ export default function Home() {
               </Text>
             ))}
 
-          {/* Do something with below loader!! */}
-          <Loader variant="dots" />
+          {loadingMyCourses && <Loader variant="dots" />}
         </Paper>
-        <Footer year="2023" fullName="Chayanin Suatap" studentId="650610560" />
+        <Footer year="2023" fullName="Ueaarthorn" studentId="650612171" />
       </Stack>
     </Container>
   );
